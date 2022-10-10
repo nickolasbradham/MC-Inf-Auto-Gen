@@ -7,8 +7,11 @@ import com.github.kwhat.jnativehook.keyboard.NativeKeyListener;
 
 final class Generator implements NativeKeyListener {
 
-	private void start() {
+	private void start() throws NativeHookException {
+		GlobalScreen.registerNativeHook();
 		GlobalScreen.addNativeKeyListener(this);
+
+		GlobalScreen.unregisterNativeHook();
 	}
 
 	/**
@@ -22,8 +25,6 @@ final class Generator implements NativeKeyListener {
 	}
 
 	public static void main(String[] args) throws NativeHookException {
-		GlobalScreen.registerNativeHook();
 		new Generator().start();
-		GlobalScreen.unregisterNativeHook();
 	}
 }
