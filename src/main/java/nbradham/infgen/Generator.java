@@ -10,7 +10,7 @@ final class Generator implements NativeKeyListener {
 	private void start() throws NativeHookException {
 		GlobalScreen.registerNativeHook();
 		GlobalScreen.addNativeKeyListener(this);
-
+		//TODO Everything else.
 		GlobalScreen.unregisterNativeHook();
 	}
 
