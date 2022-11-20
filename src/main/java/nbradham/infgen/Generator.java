@@ -34,10 +34,29 @@ final class Generator implements NativeKeyListener {
 
 		JOptionPane.showMessageDialog(null, "Ready");
 
-		byte x = 0, y = 0, t = 1;
+		byte x = 0, y = 0, t = 0;
 		Dir d = Dir.UP;
-		while (x != skpX && y != skpY) {
-			// TODO Continue code.
+		while (x != skpX || y != skpY) {
+			t++;
+			for (byte n = 0; n < 2 && (x != skpX || y != skpY); n++) {
+				switch (d) {
+				case DOWN:
+					d = Dir.LEFT;
+					break;
+				case LEFT:
+					d = Dir.UP;
+					break;
+				case RIGHT:
+					d = Dir.DOWN;
+					break;
+				case UP:
+					d = Dir.RIGHT;
+				}
+				for (byte m = 0; m < t && (x != skpX || y != skpY); m++) {
+					x += d.dx;
+					y += d.dy;
+				}
+			}
 		}
 
 		GlobalScreen.unregisterNativeHook();
@@ -56,7 +75,7 @@ final class Generator implements NativeKeyListener {
 	public static void main(String[] args) throws NativeHookException {
 		if (!(args.length == 1 || args.length == 3)) {
 			System.out.println(
-					"Arguments: <radius> [<skipX> <skipY>]\n  radius - Chunk radius to generate.\n  skipX - Generator region skip X.\n skipY = Generator region skip Y.");
+					"Arguments: <radius> [skipX skipY]\n  radius - Chunk radius to generate.\n  skipX - Generator region skip X.\n skipY = Generator region skip Y.");
 			return;
 		}
 
