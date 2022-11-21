@@ -1,5 +1,7 @@
 package nbradham.infgen;
 
+import java.io.IOException;
+import java.nio.file.Path;
 import javax.swing.JOptionPane;
 
 import com.github.kwhat.jnativehook.GlobalScreen;
@@ -7,7 +9,14 @@ import com.github.kwhat.jnativehook.NativeHookException;
 import com.github.kwhat.jnativehook.keyboard.NativeKeyEvent;
 import com.github.kwhat.jnativehook.keyboard.NativeKeyListener;
 
+import net.querz.nbt.io.NBTUtil;
+import net.querz.nbt.io.NamedTag;
+import net.querz.nbt.tag.CompoundTag;
+
 final class Generator implements NativeKeyListener {
+
+	private static final String LEVEL_DAT = Path
+			.of(System.getenv("appdata"), ".minecraft", "saves", "World1", "level.dat").toString();
 
 	private static enum Dir {
 		UP(0, 1), RIGHT(1, 0), DOWN(0, -1), LEFT(-1, 0);
@@ -20,21 +29,27 @@ final class Generator implements NativeKeyListener {
 		}
 	};
 
-	private byte r, skpX, skpY;
+	private final NamedTag nbt;
+	private final CompoundTag dat;
+	private final double r;
+	private final byte skpX, skpY;
+	private byte x = 0, y = 0;
 
-	private Generator(byte radius, byte skipX, byte skipY) {
-		r = radius;
+	private Generator(byte radius, byte skipX, byte skipY) throws IOException {
+		nbt = NBTUtil.read(LEVEL_DAT);
+		dat = ((CompoundTag) nbt.getTag()).getCompoundTag("Data");
+		r = Math.ceil(radius / 32);
 		skpX = skipX;
 		skpY = skipY;
 	}
 
-	private void start() throws NativeHookException {
+	private void start() throws NativeHookException, IOException {
 		GlobalScreen.registerNativeHook();
 		GlobalScreen.addNativeKeyListener(this);
 
 		JOptionPane.showMessageDialog(null, "Ready");
 
-		byte x = 0, y = 0, t = 0;
+		byte t = 0;
 		Dir d = Dir.UP;
 		while (x != skpX || y != skpY) {
 			t++;
@@ -59,7 +74,21 @@ final class Generator implements NativeKeyListener {
 			}
 		}
 
+		genArea();
+//		while (Math.abs(x) <= r && Math.abs(y) <= r) {
+//
+//		}
+
 		GlobalScreen.unregisterNativeHook();
+	}
+
+	private void genArea() throws IOException {
+		System.out.printf("Generating area: (%d, %d)%n", x, y);
+		dat.putInt("SpawnX", x * 32 * 16);
+		dat.putInt("SpawnY", y * 32 * 16);
+		NBTUtil.write(nbt, LEVEL_DAT);
+
+		// TODO Continue.
 	}
 
 	/**
@@ -72,7 +101,7 @@ final class Generator implements NativeKeyListener {
 		// TODO Handle.
 	}
 
-	public static void main(String[] args) throws NativeHookException {
+	public static void main(String[] args) throws NativeHookException, NumberFormatException, IOException {
 		if (!(args.length == 1 || args.length == 3)) {
 			System.out.println(
 					"Arguments: <radius> [skipX skipY]\n  radius - Chunk radius to generate.\n  skipX - Generator region skip X.\n skipY = Generator region skip Y.");
