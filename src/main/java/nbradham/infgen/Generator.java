@@ -1,5 +1,9 @@
 package nbradham.infgen;
 
+import java.awt.AWTException;
+import java.awt.Point;
+import java.awt.Robot;
+import java.awt.event.InputEvent;
 import java.io.IOException;
 import java.nio.file.Path;
 import javax.swing.JOptionPane;
@@ -29,13 +33,15 @@ final class Generator implements NativeKeyListener {
 		}
 	};
 
+	private final Robot bot;
 	private final NamedTag nbt;
 	private final CompoundTag dat;
 	private final double r;
 	private final byte skpX, skpY;
 	private byte x = 0, y = 0;
 
-	private Generator(byte radius, byte skipX, byte skipY) throws IOException {
+	private Generator(byte radius, byte skipX, byte skipY) throws IOException, AWTException {
+		bot = new Robot();
 		nbt = NBTUtil.read(LEVEL_DAT);
 		dat = ((CompoundTag) nbt.getTag()).getCompoundTag("Data");
 		r = Math.ceil(radius / 32);
@@ -87,8 +93,19 @@ final class Generator implements NativeKeyListener {
 		dat.putInt("SpawnX", x * 32 * 16);
 		dat.putInt("SpawnY", y * 32 * 16);
 		NBTUtil.write(nbt, LEVEL_DAT);
-
+		click(Config.BUT_SP);
 		// TODO Continue.
+	}
+
+	private void click(Point p) {
+		bot.mouseMove(p.x, p.y);
+		bot.mousePress(InputEvent.BUTTON1_DOWN_MASK);
+		try {
+			Thread.sleep(100);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		bot.mouseRelease(InputEvent.BUTTON1_DOWN_MASK);
 	}
 
 	/**
@@ -101,7 +118,8 @@ final class Generator implements NativeKeyListener {
 		// TODO Handle.
 	}
 
-	public static void main(String[] args) throws NativeHookException, NumberFormatException, IOException {
+	public static void main(String[] args)
+			throws NativeHookException, NumberFormatException, IOException, AWTException {
 		if (!(args.length == 1 || args.length == 3)) {
 			System.out.println(
 					"Arguments: <radius> [skipX skipY]\n  radius - Chunk radius to generate.\n  skipX - Generator region skip X.\n skipY = Generator region skip Y.");
