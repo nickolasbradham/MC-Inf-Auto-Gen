@@ -120,6 +120,10 @@ final class Generator implements NativeKeyListener {
 
 	public static void main(String[] args)
 			throws NativeHookException, NumberFormatException, IOException, AWTException {
+		if (!Config.loadConfig()) {
+			System.out.println("Config generated. Check before relaunch.");
+			return;
+		}
 		if (!(args.length == 1 || args.length == 3)) {
 			System.out.println(
 					"Arguments: <radius> [skipX skipY]\n  radius - Chunk radius to generate.\n  skipX - Generator region skip X.\n skipY = Generator region skip Y.");
