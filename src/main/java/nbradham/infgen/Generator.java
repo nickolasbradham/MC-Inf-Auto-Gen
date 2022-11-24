@@ -135,7 +135,29 @@ final class Generator implements NativeKeyListener {
 			main: while (isRadiusNotMet()) {
 				for (byte n = 0; n < 2 && isRadiusNotMet(); n++) {
 					for (byte m = 0; m < t && isRadiusNotMet(); m++) {
-						genArea();
+
+						System.out.printf("Generating area: (%d, %d)%n", x, y);
+						saveSpawn();
+						click(Config.sp);
+						click(Config.w1);
+
+						System.out.println("Waiting for load...");
+						long blackTime = -1;
+						while (isPixel(Config.menuX, Config.sp, Config.menuHue))
+							blackTime = checkCrash(blackTime);
+
+						bot.keyPress(KeyEvent.VK_ESCAPE);
+						sleep(100);
+						bot.keyRelease(KeyEvent.VK_ESCAPE);
+
+						System.out.println("Waiting for pause...");
+						waitForPixel(Config.buttonX, Config.sp, Config.quitHue);
+
+						click(Config.sp);
+
+						System.out.println("Waiting for menu...");
+						waitForPixel(Config.menuX, Config.sp, Config.menuHue);
+
 						x += d.dx;
 						y += d.dy;
 						if (pause) {
@@ -160,30 +182,6 @@ final class Generator implements NativeKeyListener {
 	}
 
 	/**
-	 * Performs one generation cycle.
-	 * 
-	 * @throws IOException          Thrown by {@link #saveSpawn()}.
-	 * @throws GameCrashedException Thrown by {@link #waitForDif(short, float)} and
-	 *                              {@link #waitForPixel(short, float)}.
-	 */
-	private void genArea() throws IOException, GameCrashedException {
-		System.out.printf("Generating area: (%d, %d)%n", x, y);
-		saveSpawn();
-		click(Config.sp);
-		click(Config.w1);
-		System.out.println("Waiting for load...");
-		waitForDif(Config.menuX, Config.menuHue);
-		bot.keyPress(KeyEvent.VK_ESCAPE);
-		sleep(100);
-		bot.keyRelease(KeyEvent.VK_ESCAPE);
-		System.out.println("Waiting for pause...");
-		waitForPixel(Config.buttonX, Config.quitHue);
-		click(Config.sp);
-		System.out.println("Waiting for menu...");
-		waitForPixel(Config.menuX, Config.menuHue);
-	}
-
-	/**
 	 * Clicks the mouse at (buttonX, {@code y}).
 	 * 
 	 * @param y The y coordinate to click at.
@@ -196,51 +194,29 @@ final class Generator implements NativeKeyListener {
 	}
 
 	/**
-	 * tests if pixel at ({@code x}, sp) has the same hue as {@code hue}.
+	 * tests if pixel at ({@code x}, {@code y} has the same hue as {@code hue}.
 	 * 
 	 * @param x   The x coordinate.
+	 * @param y   The y coordinate.
 	 * @param hue The target hue.
 	 * @return True if the hues match.
 	 */
-	private boolean isPixel(short x, float hue) {
-		return Math.abs(hue - getPixel(x)) < .01;
+	private boolean isPixel(short x, short y, float hue) {
+		Color c = bot.getPixelColor(x, y);
+		return Math.abs(hue - Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), null)[0]) < .01;
 	}
 
 	/**
-	 * Retrieves the hue of the pixel at ({@code x}, sp).
+	 * Waits until the pixel at ({@code x}, {@code y}) matches hue {@code h}.
 	 * 
-	 * @param x The x coordinate.
-	 * @return The pixel's hue.
-	 */
-	private float getPixel(short x) {
-		Color c = bot.getPixelColor(x, Config.sp);
-		return Color.RGBtoHSB(c.getRed(), c.getGreen(), c.getBlue(), null)[0];
-	}
-
-	/**
-	 * Waits until the pixel at ({@code x}, sp) has a different hue that
-	 * {@code hue}.
-	 * 
-	 * @param x   The target x coordinate.
-	 * @param hue The target hue.
+	 * @param x The pixel x coordinate.
+	 * @param y The pixel y coordinate.
+	 * @param h The desired hue.
 	 * @throws GameCrashedException Thrown by {@link #checkCrash(long)}.
 	 */
-	private void waitForDif(short x, float hue) throws GameCrashedException {
+	private void waitForPixel(short x, short y, float h) throws GameCrashedException {
 		long blackTime = -1;
-		while (isPixel(x, hue))
-			blackTime = checkCrash(blackTime);
-	}
-
-	/**
-	 * Waits until the pixel at ({@code x}, sp) has the samne hue as {@code hue}.
-	 * 
-	 * @param x   The target x coordinate.
-	 * @param hue The target hue.
-	 * @throws GameCrashedException Thrown by {@link #checkCrash(long)}.
-	 */
-	private void waitForPixel(short x, float hue) throws GameCrashedException {
-		long blackTime = -1;
-		while (!isPixel(x, hue))
+		while (!isPixel(x, y, h))
 			blackTime = checkCrash(blackTime);
 	}
 
@@ -253,7 +229,7 @@ final class Generator implements NativeKeyListener {
 	 * @throws GameCrashedException Thrown if a game crash has been detected.
 	 */
 	private long checkCrash(long blackTime) throws GameCrashedException {
-		if (isPixel(Config.menuX, 0)) {
+		if (isPixel(Config.menuX, Config.sp, 0)) {
 			if (blackTime < 0)
 				return System.currentTimeMillis();
 			else if (System.currentTimeMillis() - blackTime > 1000)
