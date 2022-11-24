@@ -1,7 +1,7 @@
 # MC-Inf-Auto-Gen
 Automates pre-generating InfDev worlds in MC.
 
-Run this utility from the command line. On first run, it will generate a config file that you will almost certainly need to edit (The exception might be if you are runnning at 1920x1080 and 100% screen scale). You can use [this](https://github.com/nickolasbradham/Java-Mouse-and-Color-Util) utility to help get the values for the config file.
+Run this utility from the command line and make sure the Minecraft window is on top and on the main menu screen. On first run, it will generate a config file that you will almost certainly need to edit (The exception might be if you are runnning at 1920x1080 and 100% screen scale). You can use [this](https://github.com/nickolasbradham/Java-Mouse-and-Color-Util) utility to help get the values for the config file. You can press `P` to pause execution after the current generation cycle is done. Return the Minecraft window and the pause prompt back to how they are were before continuing.
 
 This program has been tested on Minecraft version inf-20100330. Although it probably will work on other versions, I give no guarantee.
 
@@ -22,3 +22,6 @@ Here are the settings in the `config.cfg` file, their defaults, and what they me
 - radius - The chunk radius around (0, 0) to generate. Note that this program will generate a MINIMUM of this radius, but it will most likely generate slightly more.
 - skipX - The generation area X coordinate to skip to. Note that this is not a chunk or block coordinate, but a generator specific coordinate reported by the output.
 - skipY - The generation area Y coordinate to skip to. Note that this is not a chunk or block coordinate, but a generator specific coordinate reported by the output.
+
+
+Powered by JNativeHook: https://github.com/kwhat/jnativehook
