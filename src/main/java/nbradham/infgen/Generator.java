@@ -28,7 +28,7 @@ import net.querz.nbt.tag.ListTag;
  * @author Nickolas Bradham
  *
  */
-final class Generator implements NativeKeyListener {
+public final class Generator implements NativeKeyListener {
 
 	private static final String LEVEL_DAT = Path
 			.of(System.getenv("appdata"), ".minecraft", "saves", "World1", "level.dat").toString();
